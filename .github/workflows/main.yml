@@ -1,0 +1,29 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Se connecter à Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Construire l’image Docker
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/voting-app:latest .
+
+      - name: Scanner l’image avec Docker Scout
+        run: |
+          docker scout quickview ${{ secrets.DOCKER_USERNAME }}/voting-app:latest
+
+      - name: Pousser l’image sur Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/voting-app:latest
