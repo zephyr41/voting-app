@@ -1,0 +1,44 @@
+---
+- name: Ensure Python is installed
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Bootstrap Python
+      raw: >
+        test -e /usr/bin/python3 ||
+        (export DEBIAN_FRONTEND=noninteractive && apt-get -y update && apt-get -y install python3)
+      changed_when: false
+
+- name: Configure Python environment and deploy application
+  hosts: all
+  gather_facts: true
+  become: true
+
+  vars:
+    pip_packages:
+      - redis
+      - flask
+      - requests
+
+  roles:
+    - role: ./deps/
+      vars:
+        pip_packages: "{{ pip_packages }}"
+
+  tasks:
+    - name: Copy source code to target
+      copy:
+        src: "./azure-vote"
+        dest: "/app"
+
+    - name: Install Python pip if not present
+      package:
+        name: python3-pip
+        state: present
+      when: "'python3-pip' not in ansible_facts.packages and 'python-pip' not in ansible_facts.packages"
+
+    - name: Install dependencies via pip
+      pip:
+        name: "{{ pip_packages }}"
+      when: "'python3-pip' in ansible_facts.packages or 'python-pip' in ansible_facts.packages"
